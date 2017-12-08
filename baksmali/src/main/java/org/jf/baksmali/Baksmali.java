@@ -87,7 +87,7 @@ public class Baksmali {
                             errorOccurred = true;
                         }
                     } catch (InterruptedException ex) {
-                        continue;
+                        executor.shutdown();
                     } catch (ExecutionException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -101,7 +101,7 @@ public class Baksmali {
     }
 
     private static boolean disassembleClass(ClassDef classDef, ClassFileNameHandler fileNameHandler,
-                                            BaksmaliOptions options) {
+                                            BaksmaliOptions options) throws InterruptedException {
         /**
          * The path for the disassembly file is based on the package name
          * The class descriptor will look something like:
@@ -109,6 +109,10 @@ public class Baksmali {
          * Where the there is leading 'L' and a trailing ';', and the parts of the
          * package name are separated by '/'
          */
+        if (Thread.currentThread().isInterrupted()) {
+			Thread.currentThread().interrupt();
+			throw new InterruptedException("thread was aborted abnormally!");
+		}
         String classDescriptor = classDef.getType();
 
         //validate that the descriptor is formatted like we expect
