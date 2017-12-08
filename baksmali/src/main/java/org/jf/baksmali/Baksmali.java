@@ -87,8 +87,16 @@ public class Baksmali {
                             errorOccurred = true;
                         }
                     } catch (InterruptedException ex) {
-                        executor.shutdown();
+			/* cancel all other running tasks in case of failure in one task */
+		    	for (Future<Boolean> tsk: tasks) {
+			     tsk.cancel(true);
+		    	}
+                        //executor.shutdown();
                     } catch (ExecutionException ex) {
+		    	/* cancel all other running tasks in case of failure in one task */
+		    	for (Future<Boolean> tska: tasks) {
+			     tska.cancel(true);
+		    	}
                         throw new RuntimeException(ex);
                     }
                     break;
